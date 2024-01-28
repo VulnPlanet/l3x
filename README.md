@@ -13,7 +13,7 @@ L3X detects vulnerabilities in Smart Contracts based on patterns and AI code ana
 
 ## How It Works
 
-- **Vulnerability Patterns Analysis:** Analysis of smart contract code for [vulnerability patterns](patterns.md).
+- **Vulnerability Patterns Analysis:** Analysis of smart contract code for [vulnerability patterns](etc/patterns.md).
 - **AI Code Analysis:** Analysis of smart contract code for vulnerabilities using Language Model validators (LLMs).
 - **LLM Validators:** Potential vulnerabilities detected are passed on to multiple LLM validators for confirmation. Three different models are utilized: GPT-4, Gemini, and Claude 2.
 - **Validation Process:** Each validator independently assesses potential vulnerabilities. Detected vulnerabilities undergo a validation check.
