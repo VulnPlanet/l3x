@@ -1,6 +1,6 @@
 
 
-| ID     | Title                                     | Severity | Description                                                                                                  | Suggested Fix                                                                                                   |
+| ID     | Title                                     | Severity | Description                                                                                                  | Fix                                                                                                   |
 |--------|-------------------------------------------|----------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | VULN001 | Integer Overflow or Underflow             | High     | Performing arithmetic operation without checking for overflow or underflow.                                   | Use `checked_add`, `checked_sub`, `checked_mul`, or `checked_div` to safely perform arithmetic operations.      |
 | VULN002 | Loss of Precision                         | High     | The use of try_round_u64() for rounding up may lead to loss of precision.                                    | Use try_floor_u64() to prevent potential loss of precision.                                                     |
