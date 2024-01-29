@@ -36,16 +36,21 @@ pub async fn validate_vulnerability_with_gpt(
     line_number: usize,
     line_of_code: &str,
     file_content: &str,
+    language: &str,
 ) -> Result<(String, String), Box<dyn Error>> {
     let client = Client::new();
-    let prompt = format!(
-        "A Static Application Security Testing (SAST) tool detects a potential vulnerability titled '{title}' with severity '{severity}' at line number {line_number} in the following Rust code file. The line of code flagged is:\n\n{line_of_code}\n\nThe full code of the file is provided below for context:\n\n{file_content}\n\nBased on the information provided and the full code context, please validate whether this vulnerability is valid or a false positive. Additionally, if the vulnerability is valid, suggest a possible fix.",
-        title = title,
-        severity = severity,
-        line_number = line_number,
-        line_of_code = line_of_code,
-        file_content = file_content
-    );
+
+    let prompt = match language {
+        "Rust-Solana" => format!(
+            "A SAST tool detects a potential Rust vulnerability titled '{title}' with severity '{severity}' at line number {line_number}. The line of code flagged is:\n\n{line_of_code}\n\nFull code for context:\n\n{file_content}\n\nIs this a valid vulnerability or a false positive? If valid, suggest a fix.",
+            title = title, severity = severity, line_number = line_number, line_of_code = line_of_code, file_content = file_content
+        ),
+        "Solidity-Ethereum" => format!(
+            "A SAST tool detects a potential Solidity vulnerability titled '{title}' with severity '{severity}' at line number {line_number}. The line of code flagged is:\n\n{line_of_code}\n\nFull code for context:\n\n{file_content}\n\nIs this a valid vulnerability or a false positive? If valid, suggest a fix.",
+            title = title, severity = severity, line_number = line_number, line_of_code = line_of_code, file_content = file_content
+        ),
+        _ => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Unsupported language"))),
+    };
 
     let chat_request = ChatRequest {
         model: "gpt-3.5-turbo".to_string(),
@@ -66,35 +71,40 @@ pub async fn validate_vulnerability_with_gpt(
         let chat_response = response.json::<ChatResponse>().await?;
         let text = chat_response.choices.get(0).map_or_else(|| "", |choice| &choice.message.content);
 
-        let status = if text.contains("not a vulnerability")
-            || text.contains("is not a valid vulnerability")
-            || text.to_lowercase().contains("appears to be a false positive")
-            || text.to_lowercase().contains("is no vulnerability present")
-            || text.to_lowercase().contains("is a false positive")
-            || text.to_lowercase().contains("likely a false positive")
-            || text.to_lowercase().contains("may be a false positive")
-            || text.to_lowercase().contains("seems to be a false positive")
-            || text.to_lowercase().contains("most likely a false positive")
-            || text.to_lowercase().contains("does not contain a vulnerability")
-            || text.to_lowercase().contains("not appear to have a potential vulnerability")
-            || text.to_lowercase().contains("does not seem to have any obvious vulnerability")
-            || text.to_lowercase().contains("does not introduce a vulnerability")
-            || text.to_lowercase().contains("not suggest any security issues")
-            || text.to_lowercase().contains("does not appear to be vulnerable")
-            || text.to_lowercase().contains("does not appear to have any clear vulnerability")
-            || text.to_lowercase().contains("does not appear to have any potential vulnerability")
-            || text.to_lowercase().contains("is not valid in this case")
-            || text.to_lowercase().contains("does not appear to be valid")
-            || text.to_lowercase().contains("does not appear to contain any potential vulnerability")
-            || text.is_empty()
-        {
-            "False positive"
-        } else {
-            "Valid"
-        };
+        let status = analyze_response_text(&text);
 
         Ok((status.to_string(), text.to_string()))
     } else {
         Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "Failed to get a valid response from OpenAI")))
+    }
+}
+
+fn analyze_response_text(text: &str) -> &str {
+    if text.contains("not a vulnerability")
+        || text.contains("is not a valid vulnerability")
+        || text.contains("is not a valid vulnerability")
+        || text.to_lowercase().contains("appears to be a false positive")
+        || text.to_lowercase().contains("is no vulnerability present")
+        || text.to_lowercase().contains("is a false positive")
+        || text.to_lowercase().contains("likely a false positive")
+        || text.to_lowercase().contains("may be a false positive")
+        || text.to_lowercase().contains("seems to be a false positive")
+        || text.to_lowercase().contains("most likely a false positive")
+        || text.to_lowercase().contains("does not contain a vulnerability")
+        || text.to_lowercase().contains("not appear to have a potential vulnerability")
+        || text.to_lowercase().contains("does not seem to have any obvious vulnerability")
+        || text.to_lowercase().contains("does not introduce a vulnerability")
+        || text.to_lowercase().contains("not suggest any security issues")
+        || text.to_lowercase().contains("does not appear to be vulnerable")
+        || text.to_lowercase().contains("does not appear to have any clear vulnerability")
+        || text.to_lowercase().contains("does not appear to have any potential vulnerability")
+        || text.to_lowercase().contains("is not valid in this case")
+        || text.to_lowercase().contains("does not appear to be valid")
+        || text.to_lowercase().contains("does not appear to contain any potential vulnerability")
+        || text.is_empty()
+    {
+        "False positive"
+    } else {
+        "Valid"
     }
 }
