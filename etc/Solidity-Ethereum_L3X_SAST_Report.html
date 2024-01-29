@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Vulnerability Report</title>
+    <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+    <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f2f5;
+    }
+    h1, h2 {
+        color: #333;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    tr:hover {background-color: #f5f5f5;}
+    th {
+        background-color: #04AA6D;
+        color: white;
+    }
+    .chart-container {
+        width: 400px;
+        display: inline-block;
+        margin: 20px;
+    }
+    .charts-wrapper {
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+    <header>
+        <h1>L3X - Static Application Security Testing (SAST) Report</h1>
+        <p>Technology: Solidity-Ethereum</p>
+        <p>Check more on: <a href='https://vulnplanet.com/'>VulnPlanet</a><br>Contribute: <a href='https://github.com/VulnPlanet/l3x'>GitHub</a></p>
+    </header>
+    <section>
+    <h2>Summary</h2>
+    <div class='chart-container'>
+        <h3>By Severity</h3>
+        <canvas id='severityChart'></canvas>
+    </div>
+    <div class='chart-container'>
+        <h3>False Positive Rate</h3>
+        <canvas id='falsePositiveChart'></canvas>
+    </div>
+</section>      
+    <section>
+        <h2>Vulnerabilities</h2>
+        <p>🟢 GPT 3.5 - Valid or Not possible to determine</p>
+        <p>🔴 GPT 3.5 - False Positive</p>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Severity</th>
+                <th>File</th>
+                <th>Description</th>
+                <th>Details</th>
+            </tr>
+            <tr>
+                <td>SOLIDITY023</td>
+                <td>Reentrancy Vulnerabilities</td>
+                <td>🟢 GPT 3.5</td>
+                <td>High</td>
+                <td>/Users/ym/Downloads/not-so-smart-contracts-master/reentrancy/Reentrancy.sol</td>
+                <td>Detection of the reentrancy bug involving Ether.</td>
+                <td>This is a valid vulnerability known as a reentrancy vulnerability. In the "withdrawBalance" function, the line of code flagged is `if( ! (msg.sender.call.value(userBalance[msg.sender])() ) )`. This line of code allows for a potential attack where an attacker can repeatedly call the "withdrawBalance" function before the state variable `userBalance[msg.sender]` is updated, causing the attacker to receive multiple withdrawals from the contract.
+
+To fix this vulnerability, you can follow the approach used in the "withdrawBalance_fixed" function. The fix involves changing the state variable `userBalance[msg.sender]` before making the external call. Here's the modified code:
+
+```solidity
+function withdrawBalance(){
+    uint amount = userBalance[msg.sender];
+    userBalance[msg.sender] = 0;
+    if( ! (msg.sender.call.value(amount)() ) ){
+        throw;
+    }
+}
+```
+
+By changing the state variable before the external call, you prevent the reentrancy attack by ensuring that subsequent calls to the "withdrawBalance" function will only withdraw zero balances.</td>
+            </tr><tr>
+                <td>SOLIDITY026</td>
+                <td>Unchecked Transfer</td>
+                <td>🟢 GPT 3.5</td>
+                <td>High</td>
+                <td>/Users/ym/Downloads/not-so-smart-contracts-master/reentrancy/Reentrancy.sol</td>
+                <td>The return value of an external transfer/transferFrom call is not checked.</td>
+                <td>This is a valid vulnerability known as "Unchecked Transfer" in Solidity. The vulnerability occurs at line number 38, which is:
+
+.transfer(userBalance[msg.sender]);
+
+The problem with this line is that it uses the .transfer() function, which is prone to reentrancy attacks. An attacker may call a malicious contract's fallback function repeatedly, causing the transfer to be executed multiple times and potentially draining the contract's balance.
+
+To fix this vulnerability, you should consider using the recommended withdrawal pattern. One possible fix is shown in the code below:
+
+function withdrawBalance_fixed() {
+    uint amount = userBalance[msg.sender];
+    require(amount > 0); // Check if the user has a positive balance
+    userBalance[msg.sender] = 0;
+    msg.sender.transfer(amount);
+}
+
+In this fix, we first check if the user has a positive balance before proceeding with the transfer. This prevents the reentrancy attack since the user's balance is set to zero before the transfer occurs. Additionally, we use the .transfer() function instead of .call.value() to avoid potential reentrancy.
+
+By making this change, you can mitigate the potential vulnerability and ensure that withdrawals are done securely.</td>
+            </tr><tr>
+                <td>SOLIDITY023</td>
+                <td>Reentrancy Vulnerabilities</td>
+                <td>🟢 GPT 3.5</td>
+                <td>High</td>
+                <td>/Users/ym/Downloads/not-so-smart-contracts-master/reentrancy/ReentrancyExploit.sol</td>
+                <td>Detection of the reentrancy bug involving Ether.</td>
+                <td>This is a valid vulnerability known as "Reentrancy Vulnerabilities." The vulnerability allows an attacker to maliciously re-enter a function before the previous execution is completed, leading to unexpected behavior and potential security breaches.
+
+To fix this vulnerability, you should implement the "checks-effects-interactions" pattern. In the susceptible code, the line flagged is:
+
+```
+require(vulnerable_contract.call.value(msg.value)(bytes4(sha3("addToBalance()"))));
+```
+
+To address this vulnerability, move the interaction with the vulnerable contract to the end of the function after all checks have been performed. Here's an updated version:
+
+```
+function deposit(address _vulnerable_contract) public payable {
+    vulnerable_contract = _vulnerable_contract;
+    // perform necessary checks first
+    require(vulnerable_contract.call.value(msg.value)(bytes4(sha3("addToBalance()"))));
+}
+```
+
+By rearranging the code in this way, you ensure that the vulnerable contract is called after all other operations are completed, minimizing the risk of reentrancy attacks.</td>
+            </tr><tr>
+                <td>SOLIDITY045</td>
+                <td>Unchecked Send</td>
+                <td>🟢 GPT 3.5</td>
+                <td>Medium</td>
+                <td>/Users/ym/Downloads/not-so-smart-contracts-master/reentrancy/theRun.sol</td>
+                <td>The return value of a send is not checked.</td>
+                <td>This is a valid vulnerability. 
+
+The code uses the `.send()` method to transfer Ether to addresses stored in the `players` array without checking the return value. This can lead to potential vulnerabilities because the `.send()` method does not throw an exception when the transfer fails and instead returns a boolean value indicating success or failure.
+
+To fix this vulnerability, you should use the `.transfer()` method instead of `.send()`. The `.transfer()` method is a safeguarded way to transfer Ether that automatically throws an exception if the transfer fails, reverting any changes made during the execution of the contract. You should replace the line of code flagged (`players[Payout_id].addr.send(Last_Payout);`) with `players[Payout_id].addr.transfer(Last_Payout);`.
+
+Here is the updated line of code:
+
+```
+players[Payout_id].addr.transfer(Last_Payout);
+```
+
+By using `.transfer()` instead of `.send()`, you ensure that any failed transfers will be immediately reverted, preventing potential vulnerabilities.</td>
+            </tr><tr>
+                <td>SOLIDITY034</td>
+                <td>Contracts that Lock Ether</td>
+                <td>🟢 GPT 3.5</td>
+                <td>Medium</td>
+                <td>/Users/ym/Downloads/not-so-smart-contracts-master/reentrancy/Reentrancy.sol</td>
+                <td>Contract with a payable function, but without a withdrawal capacity.</td>
+                <td>This is a valid vulnerability in the given code. 
+
+The issue is that the function `addToBalance()` allows Ether to be added to a user's balance without any limit. This can be problematic if an external attacker or malicious contract repeatedly calls this function to lock up the contract's balance. This vulnerability is commonly referred to as the "Contracts that Lock Ether" vulnerability.
+
+To fix this vulnerability, you should implement a check within the `addToBalance()` function to limit the amount of Ether that can be added per transaction. For example, you can add a modifier that checks the value of `msg.value` and throws an exception if it exceeds a certain limit:
+
+```solidity
+function addToBalance() payable {
+    require(msg.value <= 1 ether); // Limit the amount of Ether that can be added
+    userBalance[msg.sender] += msg.value;
+}
+```
+
+By limiting the amount of Ether that can be added, you prevent the contract's balance from being locked up by an attacker.</td>
+            </tr>
+        </table>
+    </section>
+    <section>
+        <h2>Safe Patterns Overview</h2>
+        <table>
+            <tr>
+                <th>Pattern ID</th>
+                <th>Title</th>
+                <th>Safe Pattern</th>
+            </tr>
+            
+        </table>
+    </section>
+    <script>
+        var severityData = JSON.parse('{"Medium":2,"High":3}');
+        var totalValid = 5;
+        var totalInvalid = 0;
+
+        var severityCtx = document.getElementById('severityChart').getContext('2d');
+        var falsePositiveCtx = document.getElementById('falsePositiveChart').getContext('2d');
+        
+        new Chart(severityCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(severityData),
+                datasets: [{
+                    label: 'Count',
+                    data: Object.values(severityData),
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        new Chart(falsePositiveCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Valid', 'False Positive'],
+                datasets: [{
+                    label: 'Rate',
+                    data: [totalValid, totalInvalid],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(255, 99, 132, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+        });
+    </script>
+</body>
+</html>
