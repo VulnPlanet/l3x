@@ -5,6 +5,7 @@ L3X detects vulnerabilities in Smart Contracts based on patterns and AI code ana
 ## Smart Contract Support
 
 - Solana based on Rust
+- Ethereum based on Solidity
 
 ## Design
 
@@ -13,7 +14,9 @@ L3X detects vulnerabilities in Smart Contracts based on patterns and AI code ana
 
 ## How It Works
 
-- **Vulnerability Patterns Analysis:** Analysis of smart contract code for [vulnerability patterns](etc/patterns.md).
+- **Vulnerability Patterns Analysis:** Analysis of smart contract code for
+    - [Rust-Solana](etc/patterns-sol.md)
+    - [Solidity-Ethereum](etc/patterns-eth-solidity.md)
 - **AI Code Analysis:** Analysis of smart contract code for vulnerabilities using Language Model validators (LLMs).
 - **LLM Validators:** Potential vulnerabilities detected are passed on to multiple LLM validators for confirmation. Three different models are utilized: GPT-4, Gemini, and Claude 2.
 - **Validation Process:** Each validator independently assesses potential vulnerabilities. Detected vulnerabilities undergo a validation check.
@@ -74,7 +77,9 @@ l3x smart-contracts-folder-to-analyse
 
 ![gif!](etc/report.gif)
 
-[Report example](https://github.com/VulnPlanet/l3x/blob/main/etc/L3X_SAST_Report.html)
+[Report example - Solana](https://github.com/VulnPlanet/l3x/blob/main/etc/L3X_SAST_Report.html)
+
+[Report example - Ethereum](https://github.com/VulnPlanet/l3x/blob/main/etc/Solidity-Ethereum_L3X_SAST_Report.html)
 
 ## Roadmap 🗓️
 
