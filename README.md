@@ -89,6 +89,9 @@ l3x smart-contracts-folder-to-analyse
 
 - ~~Design~~
 - ~~MVP concept~~
+- ~~Rust support~~
+- ~~Solana support~~
+- ~~Solidity support~~
 - GPT-4 Integration 🔜 
 - Claude Integration 
 - Gemini Integration 
