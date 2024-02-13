@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .get_matches();
 
         let folder_path = matches.value_of("folder_path").unwrap();
-        let api_key = std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set");
+        let api_key = std::env::var("OPENAI_KEY").expect("OPENAI_KEY must be set");
     
         let rt = Runtime::new()?;
         rt.block_on(async {
@@ -66,7 +66,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }) {
             let path = entry.path();
             let language = match path.extension().and_then(|e| e.to_str()) {
-                Some("rs") => "Rust-Solana",
+                Some("rs") => "Rust",
                 Some("sol") => "Solidity-Ethereum",
                 _ => continue,
             };

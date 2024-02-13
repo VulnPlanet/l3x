@@ -41,7 +41,7 @@ pub async fn validate_vulnerability_with_gpt(
     let client = Client::new();
 
     let prompt = match language {
-        "Rust-Solana" => format!(
+        "Rust" => format!(
             "A SAST tool detects a potential Rust vulnerability titled '{title}' with severity '{severity}' at line number {line_number}. The line of code flagged is:\n\n{line_of_code}\n\nFull code for context:\n\n{file_content}\n\nIs this a valid vulnerability or a false positive? If valid, suggest a fix.",
             title = title, severity = severity, line_number = line_number, line_of_code = line_of_code, file_content = file_content
         ),

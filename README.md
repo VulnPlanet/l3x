@@ -1,11 +1,12 @@
 # L3X - AI-driven Smart Contract Static Analyzer
 
-L3X detects vulnerabilities in Smart Contracts based on patterns and AI code analysis. Various LLMs act as validators for vulnerabilities detected by patterns and validate each other's results in AI code analysis. Vulnerabilities are confirmed when they receive confirmation from a majority of validators. As a result, a report with validated vulnerabilities and detected safe patterns is generated.
+L3X detects vulnerabilities in Rust and Solidity code based on patterns and AI code analysis. Various LLMs act as validators for vulnerabilities detected by patterns and validate each other's results in AI code analysis. Vulnerabilities are confirmed when they receive confirmation from a majority of validators. As a result, a report with validated vulnerabilities and detected safe patterns is generated.
 
-## Smart Contract Support
+## Supported Languages and Smart Contracts:
 
-- Solana based on Rust
-- Ethereum based on Solidity
+- General Rust code
+- Rust-based Solana smart contracts
+- Solidity-based Ethereum smart contracts
 
 ## Design
 
@@ -14,7 +15,8 @@ L3X detects vulnerabilities in Smart Contracts based on patterns and AI code ana
 
 ## How It Works
 
-- **Vulnerability Patterns Analysis:** Analysis of smart contract code for
+- **Vulnerability Patterns Analysis:** Analysis of code for
+    - [Rust-General](etc/patterns-rust.md)
     - [Rust-Solana](etc/patterns-sol.md)
     - [Solidity-Ethereum](etc/patterns-eth-solidity.md)
 - **AI Code Analysis:** Analysis of smart contract code for vulnerabilities using Language Model validators (LLMs).
@@ -76,6 +78,8 @@ l3x smart-contracts-folder-to-analyse
 ![exec!](etc/exec.png)
 
 ![gif!](etc/report.gif)
+
+[Report example - Rust](https://github.com/VulnPlanet/l3x/blob/main/etc/L3X_SAST_Report_Rust.html)
 
 [Report example - Solana](https://github.com/VulnPlanet/l3x/blob/main/etc/L3X_SAST_Report.html)
 

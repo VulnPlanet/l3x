@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Vulnerability Report</title>
+    <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+    <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f2f5;
+    }
+    h1, h2 {
+        color: #333;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    tr:hover {background-color: #f5f5f5;}
+    th {
+        background-color: #04AA6D;
+        color: white;
+    }
+    .chart-container {
+        width: 400px;
+        display: inline-block;
+        margin: 20px;
+    }
+    .charts-wrapper {
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+    <header>
+        <h1>L3X - Static Application Security Testing (SAST) Report</h1>
+        <p>Technology: Rust</p>
+        <p>Check more on: <a href='https://vulnplanet.com/'>VulnPlanet</a><br>Contribute: <a href='https://github.com/VulnPlanet/l3x'>GitHub</a></p>
+    </header>
+    <section>
+    <h2>Summary</h2>
+    <div class='chart-container'>
+        <h3>By Severity</h3>
+        <canvas id='severityChart'></canvas>
+    </div>
+    <div class='chart-container'>
+        <h3>False Positive Rate</h3>
+        <canvas id='falsePositiveChart'></canvas>
+    </div>
+</section>      
+    <section>
+        <h2>Vulnerabilities</h2>
+        <p>🟢 GPT 3.5 - Valid or Not possible to determine</p>
+        <p>🔴 GPT 3.5 - False Positive</p>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Severity</th>
+                <th>File</th>
+                <th>Description</th>
+                <th>Details</th>
+            </tr>
+            <tr>
+                <td>RUST012</td>
+                <td>[Rust-General] Integer Overflow</td>
+                <td>🟢 GPT 3.5</td>
+                <td>High</td>
+                <td>testcode/test.rs</td>
+                <td>Arithmetic operations that may overflow, leading to incorrect calculations or vulnerabilities.</td>
+                <td>This is a valid vulnerability. The flagged code `c = a + b;` performs an addition operation without checking for integer overflow. In Rust, integer overflow is handled differently in debug and release modes. In debug mode, an overflow will cause a panic, whereas in release mode, the result will wrap around. 
+
+To fix this vulnerability, you can use the checked arithmetic operations provided by Rust. The checked addition operation returns an `Option` that contains the sum if no overflow occurs, or `None` if an overflow occurs. You can use pattern matching to handle the result of the addition operation. Here's an example fix:
+
+```rust
+fn arithmetic_overflow_examples() {
+    let a: u8 = 255;
+    let b: u8 = 1;
+    let c = a.checked_add(b);
+    
+    match c {
+        Some(result) => println!("No overflow: {}", result),
+        None => println!("Overflow occurred"),
+    }
+    
+    let large_num = std::u32::MAX;
+    let another_large_num = 1;
+    let result = large_num.checked_mul(another_large_num);
+    
+    match result {
+        Some(result) => println!("No overflow: {}", result),
+        None => println!("Overflow occurred"),
+    }
+}
+```
+
+By using the checked addition and checked multiplication operations, you can detect overflow and handle it accordingly.</td>
+            </tr><tr>
+                <td>RUST020</td>
+                <td>[Rust-General] Unsafe Dereferencing</td>
+                <td>🟢 GPT 3.5</td>
+                <td>High</td>
+                <td>testcode/test.rs</td>
+                <td>Dereferencing pointers without ensuring they point to valid memory, leading to potential segmentation faults or undefined behavior.</td>
+                <td>This is a valid vulnerability detected by the SAST tool. The vulnerability is titled '[Rust-General] Unsafe Dereferencing' and has a severity level of 'High'. 
+
+The line of code flagged is:
+
+```rust
+println!("Dereferencing a raw pointer: {}", *y);
+```
+
+This vulnerability occurs because `y` is a dangling pointer, which means it refers to memory that has been deallocated. Dereferencing such a pointer can lead to undefined behavior, potentially causing crashes or security vulnerabilities. 
+
+To fix this vulnerability, you can avoid dereferencing the dangling pointer. You should make sure that the pointer is pointing to a valid memory location before dereferencing it. One way to ensure this is by using `std::ptr::null` or `std::ptr::null_mut` to represent a null pointer in situations where the value may become deallocated. Then, before dereferencing the pointer, you can check if it is null using an `if` statement to avoid undefined behavior.
+
+Here's an example of how you can modify the code to avoid the vulnerability:
+
+```rust
+// RUST020 - Unsafe Dereferencing
+if !y.is_null() {
+    println!("Dereferencing a raw pointer: {}", *y);
+}
+```
+
+By performing the null check, you prevent the program from attempting to dereference a dangling pointer and avoid the potential vulnerability.</td>
+            </tr><tr>
+                <td>RUST006</td>
+                <td>[Rust-General] Memory Leaks</td>
+                <td>🟢 GPT 3.5</td>
+                <td>Medium</td>
+                <td>testcode/test.rs</td>
+                <td>Improper use of memory allocation that could result in memory leaks.</td>
+                <td>This is a valid vulnerability. The potential Rust vulnerability titled '[Rust-General] Memory Leaks' flagged by the SAST tool is valid because it identifies a memory leak issue. 
+
+The flagged line of code is:
+```
+Box::new(
+```
+The potential memory leak occurs when a Box is created but not assigned to any variable. This results in a memory allocation that is never freed. To fix this issue, you should assign the Box to a variable or drop it immediately if it is not needed.
+
+Here's an updated version of the code with the fix:
+```rust
+use std::mem;
+use std::ptr;
+
+fn main() {
+    unsafe_code_examples();
+    arithmetic_overflow_examples();
+}
+
+unsafe fn unsafe_code_examples() {
+    // RUST011 - Use After Free
+    let x = Box::new(42);
+    let y = Box::into_raw(x); // Allocation is freed here, y is now a dangling pointer
+    drop(Box::from_raw(y)); // Use after free
+    
+    // RUST020 - Unsafe Dereferencing
+    println!("Dereferencing a raw pointer: {}", *y);
+
+    // RUST003 - Dangling Pointers
+    let z: *const i32;
+    {
+        let temp_var = 33;
+        z = &temp_var as *const i32; // z becomes a dangling pointer here
+    }
+    println!("Dangling pointer access: {:?}", z);
+
+    // Directly manipulating memory without proper checks can lead to undefined behavior
+    let mut array = [1, 2, 3, 4, 5];
+    let array_ptr: *mut i32 = array.as_mut_ptr();
+    ptr::write(array_ptr.offset(5), 999); // RUST004 - Buffer Overflows
+}
+
+fn arithmetic_overflow_examples() {
+    // RUST012 - Integer Overflow
+    let a: u8 = 255;
+    let b: u8 = 1;
+    let c = a + b; // This will overflow in debug mode, or wrap in release mode
+    println!("Overflow example: {}", c);
+
+    // Demonstrating unchecked arithmetic operations
+    let large_num = std::u32::MAX;
+    let another_large_num = 1;
+    let result = large_num * another_large_num; // Potential for RUST012 - Integer Overflow
+    println!("Unchecked multiplication might overflow: {}", result);
+}
+```
+
+In this fix, the Box is assigned to the variable `x` to ensure ownership and proper memory management.</td>
+            </tr>
+        </table>
+    </section>
+    <section>
+        <h2>Safe Patterns Overview</h2>
+        <table>
+            <tr>
+                <th>Pattern ID</th>
+                <th>Title</th>
+                <th>Safe Pattern</th>
+            </tr>
+            
+        </table>
+    </section>
+    <script>
+        var severityData = JSON.parse('{"Medium":1,"High":2}');
+        var totalValid = 3;
+        var totalInvalid = 0;
+
+        var severityCtx = document.getElementById('severityChart').getContext('2d');
+        var falsePositiveCtx = document.getElementById('falsePositiveChart').getContext('2d');
+        
+        new Chart(severityCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(severityData),
+                datasets: [{
+                    label: 'Count',
+                    data: Object.values(severityData),
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        new Chart(falsePositiveCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Valid', 'False Positive'],
+                datasets: [{
+                    label: 'Rate',
+                    data: [totalValid, totalInvalid],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(255, 99, 132, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+        });
+    </script>
+</body>
+</html>
