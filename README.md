@@ -69,6 +69,9 @@ cargo build
 cargo run
 ```
 3. Run
+
+Note: By default, only critical and high severity findings are validated. To validate all findings, use the `--all-severities` flag.
+
 ```bash
 l3x smart-contracts-folder-to-analyse
 ```
