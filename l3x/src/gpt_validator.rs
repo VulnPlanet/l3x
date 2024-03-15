@@ -29,25 +29,30 @@ struct MessageContent {
     content: String,
 }
 
-pub async fn validate_vulnerability_with_gpt(
+pub async fn validate_vulnerabilities_with_gpt(
     api_key: &str,
-    title: &str,
-    severity: &str,
-    line_number: usize,
-    line_of_code: &str,
+    findings_by_file: &[(usize, String, String, String)],
     file_content: &str,
     language: &str,
+    validate_all_severities: bool,
 ) -> Result<(String, String), Box<dyn Error>> {
     let client = Client::new();
 
+    let mut findings_list = String::new();
+    for (line_number, vulnerability_id, severity, _) in findings_by_file {
+        if validate_all_severities || severity == "Critical" || severity == "High" {
+            findings_list.push_str(&format!("line {}: {}\n", line_number, vulnerability_id));
+        }
+    }
+
     let prompt = match language {
         "Rust" => format!(
-            "A SAST tool detects a potential Rust vulnerability titled '{title}' with severity '{severity}' at line number {line_number}. The line of code flagged is:\n\n{line_of_code}\n\nFull code for context:\n\n{file_content}\n\nIs this a valid vulnerability or a false positive? If valid, suggest a fix.",
-            title = title, severity = severity, line_number = line_number, line_of_code = line_of_code, file_content = file_content
+            "A SAST tool detects potential Rust vulnerabilities in the following file:\n\nSource code:\n{}\n\nFindings list:\n{}\n\nAre these valid vulnerabilities or false positives? Provide an explanation.",
+            file_content, findings_list
         ),
         "Solidity-Ethereum" => format!(
-            "A SAST tool detects a potential Solidity vulnerability titled '{title}' with severity '{severity}' at line number {line_number}. The line of code flagged is:\n\n{line_of_code}\n\nFull code for context:\n\n{file_content}\n\nIs this a valid vulnerability or a false positive? If valid, suggest a fix.",
-            title = title, severity = severity, line_number = line_number, line_of_code = line_of_code, file_content = file_content
+            "A SAST tool detects potential Solidity vulnerabilities in the following file:\n\nSource code:\n{}\n\nFindings list:\n{}\n\nAre these valid vulnerabilities or false positives? Provide an explanation.",
+            file_content, findings_list
         ),
         _ => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Unsupported language"))),
     };
@@ -73,7 +78,7 @@ pub async fn validate_vulnerability_with_gpt(
 
         let status = analyze_response_text(&text);
 
-        Ok((status.to_string(), text.to_string()))
+        Ok((status.to_string(), "".to_string()))
     } else {
         Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "Failed to get a valid response from OpenAI")))
     }
@@ -81,7 +86,6 @@ pub async fn validate_vulnerability_with_gpt(
 
 fn analyze_response_text(text: &str) -> &str {
     if text.contains("not a vulnerability")
-        || text.contains("is not a valid vulnerability")
         || text.contains("is not a valid vulnerability")
         || text.to_lowercase().contains("appears to be a false positive")
         || text.to_lowercase().contains("is no vulnerability present")
