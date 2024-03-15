@@ -1,6 +1,7 @@
 # L3X - AI-driven Static Analyzer
 
 L3X detects vulnerabilities in Rust and Solidity code based on patterns and AI code analysis. Various LLMs act as validators for vulnerabilities detected by patterns and validate each other's results in AI code analysis. Vulnerabilities are confirmed when they receive confirmation from a majority of validators. As a result, a report with validated vulnerabilities and detected safe patterns is generated.
+This project is still under development and can be used only for testing purposes.
 
 ## Supported Languages and Smart Contracts:
 
