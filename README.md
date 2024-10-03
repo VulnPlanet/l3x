@@ -108,4 +108,4 @@ l3x smart-contracts-folder-to-analyse [--all-severities] [--no-validation] [--mo
 
 ## Contact 📧
 
-All suggestions write to contact contact@vulnplanet.com
+All suggestions write to contact contact@vulnplanet.com or yevhsec1@gmail.com
